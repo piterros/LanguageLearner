@@ -6,5 +6,5 @@ quiz = Quiz()
 # for x in quiz.quiz(language='es'):
 #     print(x[1])
 
-quiz.test()
+quiz.test(language='es_pl', number_of_questions=1)
 
