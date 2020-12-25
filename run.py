@@ -3,6 +3,8 @@ from quiz import Quiz
 
 quiz = Quiz()
 # quiz.quiz()
-for x in quiz.quiz():
-    print(x)
+# for x in quiz.quiz(language='es'):
+#     print(x[1])
+
+quiz.test()
 
