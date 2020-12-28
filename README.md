@@ -1,0 +1,1 @@
+This is a program to help learning Spanish language. In 'sample/' you should put CSV files with translation. You run program by command 'python run.py'. In the beginning you have to specify category, number of questions and language (PL to ES or ES to PL)

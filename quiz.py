@@ -1,69 +1,79 @@
-from dataclasses import dataclass
 from load_files import LoadFiles
 import random
 from sys import exit
 
-@dataclass
 class Quiz:
     """
     Main class for performing quiz.
-    :argument:
-        number_of_questions - number of questions to run.
     """
-    number_of_questions: int
+    def __init__(self):
+        self.correct_answer: str = ''
 
     def get_questions(self) -> tuple:
         """
         Get category, questions and answers from CSV file.
         :returns:
-            category, questions and answers or Exception of specified number of questions os too large.
+            category, questions and answers
         """
         load_files = LoadFiles()
-        try:
-            for key, value in load_files.load_csv_files().items():
-                yield key, random.sample(list(value.items()), self.number_of_questions)
-        except ValueError:
-            exit('Specified number of questions is larger than number of questions in CSV files!')
+        for key, value in load_files.load_csv_files().items():
+            yield key, list(value.items()), len(list(value.items()))
 
-    def select_category(self) -> int:
+    def get_questions_data(self) -> None:
         """
-        Select category from available categories
-        :returns:
-            number of category
-        """
-        for question in self.iterate():
-            print(question[0], question[1][0])
-        return int(input('Select category:'))
-
-    def perform_quiz(self, language='es_pl') -> None:
-        """
-        Main method to run quiz.
-        :param:
-            language: language that should be as a question and answer.
-        """
-        selected_category = self.select_category()
-        for questions in self.iterate():
-            if questions[0] == selected_category:
-                print('Chosen:', questions[1][0])
-                for question in questions[1][1]:
-                    if language == 'es_pl':
-                        correct_answer = question[1]
-                        print(question[0])
-                    else:
-                        correct_answer = question[0]
-                        print(question[1])
-
-                    answer = input('answer: ').encode('utf-8').rstrip()
-                    if answer.lower() == correct_answer.lower().encode('utf-8'):
-                        print('GOOD!')
-                    else:
-                        print('WRONG! Correct answer:', correct_answer)
-
-    def iterate(self) -> tuple:
-        """
-        Iterate over questions.
-        :returns:
-            Tuple with category number, question and answer from CSV file.
+        Print number of category, category name, and number of questions.
         """
         for question in list(enumerate(self.get_questions())):
-            yield question
+            print(f"{question[0]} {question[1][0]} [questions: {question[1][2]}]")
+
+    def select_category_and_number_of_questions(self):
+        """
+        Select category from available categories.
+        :returns:
+            number of category or Exception of specified number of questions os too large.
+        """
+        self.get_questions_data()
+        category = int(input('Select category: '))
+        print(f'Chosen category: {list(self.get_questions())[category][0]}')
+
+        try:
+            number_of_questions = int(input('Set number of questions: '))
+            randomized_questions = random.sample(list(enumerate(self.get_questions()))[category][1][1],
+                                                 number_of_questions)
+            return randomized_questions
+        except ValueError:
+            exit('ERROR! Specified number of questions is larger than number of questions in CSV files!')
+
+    def perform_quiz(self):
+        """
+        Main method to run quiz.
+        """
+        selected_questions = self.select_category_and_number_of_questions()
+        wrong_language = True
+        while wrong_language:
+            wrong_language = False
+            language = input('Select language: ')
+            for questions in selected_questions:
+                if language == 'es_pl':
+                    self.correct_answer = questions[1]
+                    print(questions[0])
+                    self.send_answer()
+                elif language == 'pl_es':
+                    self.correct_answer = questions[0]
+                    print(questions[1])
+                    self.send_answer()
+                else:
+                    print('Wrong language!')
+                    wrong_language = True
+                    break
+
+    def send_answer(self) -> None:
+        """
+        Send answer and check if it's correct.
+        """
+        answer = input('answer: ').encode('utf-8').strip()
+        if answer.lower() == self.correct_answer.lower().encode('utf-8').strip():
+            print('GOOD!')
+        else:
+            print('WRONG! Correct answer:', self.correct_answer)
+
